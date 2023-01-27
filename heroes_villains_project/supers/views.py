@@ -9,16 +9,27 @@ from super_types.models import Super_Type
 
 @api_view(['GET','POST'])  
 def supers_list(request):
-    
     if request.method == 'GET':
-        # type = request.query_params.get(type)
-        super = Super.objects.all()
-        # if type:
-        #     super = queryset.filter()
+        super_type = request.query_params.get('type')
+        queryset = Super.objects.all()
+        
+        if super_type:
+            queryset = queryset.filter(super_type__type=type)
+            serializer = SuperSerializer(queryset, many=True)
+            return Response(serializer.data)
+        else:
+            heroes = Super.objects.filter(super_type = 1)
+            villains = Super.objects.filter(super_type = 2)
+            heroes_serializer = SuperSerializer(heroes, many=True)
+            villains_serializer = SuperSerializer(villains, many=True)
             
+            custom_response_dictionary = {
+                
+                "Heroes":  heroes_serializer.data,
+                "Villains": villains_serializer.data,
+            }
+            return Response(custom_response_dictionary)
             
-        serializer = SuperSerializer(super, many=True)
-        return Response(serializer.data)
     elif request.method == 'POST':
         serializer = SuperSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
